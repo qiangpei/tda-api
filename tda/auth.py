@@ -70,7 +70,7 @@ def _register_token_redactions(token):
     register_redactions(token)
 
 
-def client_from_token_file(token_path, api_key, asyncio=False, enforce_enums=True):
+def client_from_token_file(token_path, api_key, asyncio=False, enforce_enums=True, **kwargs):
     '''
     Returns a session from an existing token file. The session will perform
     an auth refresh as needed. It will also update the token on disk whenever
@@ -95,7 +95,7 @@ def client_from_token_file(token_path, api_key, asyncio=False, enforce_enums=Tru
 
     return client_from_access_functions(
         api_key, load, __update_token(token_path), asyncio=asyncio,
-        enforce_enums=enforce_enums)
+        enforce_enums=enforce_enums, **kwargs)
 
 
 def __fetch_and_register_token_from_redirect(
@@ -427,7 +427,7 @@ def client_from_manual_flow(api_key, redirect_url, token_path,
 
 
 def easy_client(api_key, redirect_uri, token_path, webdriver_func=None,
-                asyncio=False, enforce_enums=True):
+                asyncio=False, enforce_enums=True, **kwargs):
     '''Convenient wrapper around :func:`client_from_login_flow` and
     :func:`client_from_token_file`. If ``token_path`` exists, loads the token
     from it. Otherwise open a login flow to fetch a new token. Returns a client
@@ -464,7 +464,7 @@ def easy_client(api_key, redirect_uri, token_path, webdriver_func=None,
 
     if os.path.isfile(token_path):
         c = client_from_token_file(token_path, api_key, asyncio=asyncio,
-                                   enforce_enums=enforce_enums)
+                                   enforce_enums=enforce_enums, **kwargs)
         logger.info(
                 'Returning client loaded from token file \'%s\'', token_path)
         return c
@@ -487,7 +487,7 @@ def easy_client(api_key, redirect_uri, token_path, webdriver_func=None,
 
 def client_from_access_functions(api_key, token_read_func,
                                  token_write_func, asyncio=False,
-                                 enforce_enums=True):
+                                 enforce_enums=True, **kwargs):
     '''
     Returns a session from an existing token file, using the accessor methods to
     read and write the token. This is an advanced method for users who do not
@@ -552,5 +552,6 @@ def client_from_access_functions(api_key, token_read_func,
         session_class(api_key,
             token=token,
             token_endpoint=TOKEN_ENDPOINT,
-            update_token=oauth_client_update_token),
+            update_token=oauth_client_update_token,
+            **kwargs),
         token_metadata=metadata, enforce_enums=enforce_enums)
